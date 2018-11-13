@@ -1,0 +1,56 @@
+<html>
+<!-- Load TensorFlow.js. This is required to use MobileNet. -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.7"> </script>
+<!-- Load the MobileNet model. -->
+
+<!-- Replace this with your image. Make sure CORS settings allow reading the image! -->
+<p><input type="file" name="picField" id="picField" size="24" onchange="preview_2(this);" alt=""/></p>
+<p><img id="img"></img></p>
+<p>Result: <span id="result"></span></p>
+
+
+<!-- Place your code in the script tag below. You can also use an external .js file -->
+<script>
+  // Notice there is no 'import' statement. 'mobilenet' and 'tf' is
+  // available on the index-page because of the script tag above.
+
+  const start = async function() {
+    const img = document.getElementById('img');
+
+    // Load the model.
+    model = await tf.loadModel("model.json");
+
+    example = tf.fromPixels(img);
+    example = tf.cast(example, 'float32');
+    example = tf.div(example, tf.fill([130, 300, 3], 255));
+    example = tf.stack([example]);
+    prediction = model.predict(example);
+    console.log(prediction);
+    document.getElementById("result").innerText = prediction.dataSync()[0];
+  }
+
+  document.getElementById('picField').onchange = function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        files = tgt.files;
+
+    // FileReader support
+    if (FileReader && files && files.length) {
+        var fr = new FileReader();
+        fr.onload = function () {
+            document.getElementById("img").src = fr.result;
+        }
+        fr.readAsDataURL(files[0]);
+        start();
+    }
+
+    // Not supported
+    else {
+        // fallback -- perhaps submit the input to an iframe and temporarily store
+        // them on the server until the user's session ends.
+    }
+}
+  
+
+  start();
+</script>
+</html>
